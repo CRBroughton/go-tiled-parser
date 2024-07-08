@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -10,47 +11,48 @@ import (
 )
 
 type Map struct {
-	TMXName      xml.Name  `xml:"map"`
-	Version      string    `xml:"version,attr"`
-	TiledVersion string    `xml:"tiledversion,attr"`
-	Orientation  string    `xml:"orientation,attr"`
-	RenderOrder  string    `xml:"renderorder,attr"`
-	Width        int       `xml:"width,attr"`
-	Height       int       `xml:"height,attr"`
-	TileWidth    int       `xml:"tilewidth,attr"`
-	TileHeight   int       `xml:"tileheight,attr"`
-	Infinite     int       `xml:"infinite,attr"`
-	NextLayerID  int       `xml:"nextlayerid,attr"`
-	NextObjectID int       `xml:"nextobjectid,attr"`
-	Tilesets     []Tileset `xml:"tileset"`
-	Layers       []Layer   `xml:"layer"`
+	Version      string    `xml:"version,attr" json:"version"`
+	TiledVersion string    `xml:"tiledversion,attr" json:"tiledVersion"`
+	Orientation  string    `xml:"orientation,attr" json:"orientation"`
+	RenderOrder  string    `xml:"renderorder,attr" json:"renderOrder"`
+	Width        int       `xml:"width,attr" json:"width"`
+	Height       int       `xml:"height,attr" json:"height"`
+	TileWidth    int       `xml:"tilewidth,attr" json:"tileWidth"`
+	TileHeight   int       `xml:"tileheight,attr" json:"tileHeight"`
+	Infinite     int       `xml:"infinite,attr" json:"infinite"`
+	NextLayerID  int       `xml:"nextlayerid,attr" json:"nextLayerID"`
+	NextObjectID int       `xml:"nextobjectid,attr" json:"nextObjectID"`
+	Tilesets     []Tileset `xml:"tileset" json:"tilesets"`
+	Layers       []Layer   `xml:"layer" json:"layers"`
 }
 
 type Tileset struct {
-	FirstGID int    `xml:"firstgid,attr"`
-	Source   string `xml:"source,attr"`
+	FirstGID int    `xml:"firstgid,attr" json:"firstGID"`
+	Source   string `xml:"source,attr" json:"source"`
 }
 
 type Layer struct {
-	ID     int    `xml:"id,attr"`
-	Name   string `xml:"name,attr"`
-	Width  int    `xml:"width,attr"`
-	Height int    `xml:"height,attr"`
-	Data   Data   `xml:"data"`
+	ID     int    `xml:"id,attr" json:"id"`
+	Name   string `xml:"name,attr" json:"name"`
+	Width  int    `xml:"width,attr" json:"width"`
+	Height int    `xml:"height,attr" json:"height"`
+	Data   Data   `xml:"data" json:"data"`
 }
 
 type Data struct {
-	Encoding string `xml:"encoding,attr"`
-	Content  string `xml:",chardata"`
+	Encoding string     `xml:"encoding,attr" json:"encoding"`
+	Content  [][]string `xml:"-" json:"content"`
+	Raw      string     `xml:",chardata" json:"-"`
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run main.go <path_to_map.tmx>")
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: go run main.go <path_to_map.xml> <output_json_path>")
 		return
 	}
 
-	mapFile, err := os.Open(os.Args[1])
+	filePath := os.Args[1]
+	mapFile, err := os.Open(filePath)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -70,12 +72,10 @@ func main() {
 		return
 	}
 
-	for _, layer := range gameMap.Layers {
-		fmt.Printf("Layer ID: %d, Name: %s, Width: %d, Height: %d\n", layer.ID, layer.Name, layer.Width, layer.Height)
-		fmt.Println("Data content (CSV):")
-
-		csvReader := csv.NewReader(strings.NewReader(layer.Data.Content))
+	for i, layer := range gameMap.Layers {
+		csvReader := csv.NewReader(strings.NewReader(layer.Data.Raw))
 		csvReader.FieldsPerRecord = -1
+		var csvData [][]string
 		for {
 			record, err := csvReader.Read()
 			if err == io.EOF {
@@ -85,8 +85,23 @@ func main() {
 				fmt.Println("Error reading CSV data:", err)
 				break
 			}
-			fmt.Println(record)
+			csvData = append(csvData, record)
 		}
-		fmt.Println()
+		gameMap.Layers[i].Data.Content = csvData
 	}
+
+	jsonData, err := json.MarshalIndent(gameMap, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	outputFile := os.Args[2]
+	err = os.WriteFile(outputFile, jsonData, 0644)
+	if err != nil {
+		fmt.Printf("Error writing to file: %v\n", err)
+		return
+	}
+
+	fmt.Printf("JSON data successfully written to %s\n", outputFile)
 }
