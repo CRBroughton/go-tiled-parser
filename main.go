@@ -85,7 +85,7 @@ func main() {
 				fmt.Println("Error reading CSV data:", err)
 				break
 			}
-			csvData = append(csvData, record)
+			csvData = append(csvData, record[:len(record)-1])
 		}
 		gameMap.Layers[i].Data.Content = csvData
 	}
