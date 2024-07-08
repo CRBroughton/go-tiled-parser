@@ -1,0 +1,1 @@
+A basic parser and JSON builder for Tiled files
