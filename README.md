@@ -1,4 +1,6 @@
-# A basic parser and JSON builder for Tiled files
+# Go Tiled Parser
+
+A basic parser and JSON builder for Tiled files
 
 ### Usage
 
