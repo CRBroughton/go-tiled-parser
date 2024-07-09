@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
@@ -45,12 +46,41 @@ type Data struct {
 	Raw      string     `xml:",chardata" json:"-"`
 }
 
+func GetMapData(gameBytes []byte) Map {
+	var gameMap Map
+	err := xml.Unmarshal(gameBytes, &gameMap)
+	if err != nil {
+		log.Fatal("Error unmarshaling TMX file:", err)
+	}
+
+	for i, layer := range gameMap.Layers {
+		csvReader := csv.NewReader(strings.NewReader(layer.Data.Raw))
+		csvReader.FieldsPerRecord = -1
+		var csvData [][]string
+		for {
+			record, err := csvReader.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatal("Error reading CSV data:", err)
+				break
+			}
+			csvData = append(csvData, record[:len(record)-1])
+		}
+		gameMap.Layers[i].Data.Content = csvData
+	}
+
+	return gameMap
+}
+
 func main() {
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: go run main.go <path_to_map.xml> <output_json_path>")
 		return
 	}
 
+	// TODO - Refactor into generic reader
 	filePath := os.Args[1]
 	mapFile, err := os.Open(filePath)
 	if err != nil {
@@ -65,30 +95,7 @@ func main() {
 		return
 	}
 
-	var gameMap Map
-	err = xml.Unmarshal(byteValue, &gameMap)
-	if err != nil {
-		fmt.Println("Error unmarshaling TMX file:", err)
-		return
-	}
-
-	for i, layer := range gameMap.Layers {
-		csvReader := csv.NewReader(strings.NewReader(layer.Data.Raw))
-		csvReader.FieldsPerRecord = -1
-		var csvData [][]string
-		for {
-			record, err := csvReader.Read()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				fmt.Println("Error reading CSV data:", err)
-				break
-			}
-			csvData = append(csvData, record[:len(record)-1])
-		}
-		gameMap.Layers[i].Data.Content = csvData
-	}
+	gameMap := GetMapData(byteValue)
 
 	jsonData, err := json.MarshalIndent(gameMap, "", "  ")
 	if err != nil {
