@@ -43,6 +43,16 @@ type Data struct {
 	Raw      string     `xml:",chardata" json:"-"`
 }
 
+func removeEmptyStrings(strings []string) []string {
+	var result []string
+	for _, str := range strings {
+		if str != "" {
+			result = append(result, str)
+		}
+	}
+	return result
+}
+
 func GetMapData(gameBytes []byte) Map {
 	var gameMap Map
 	err := xml.Unmarshal(gameBytes, &gameMap)
@@ -63,7 +73,7 @@ func GetMapData(gameBytes []byte) Map {
 				log.Fatal("Error reading CSV data:", err)
 				break
 			}
-			csvData = append(csvData, record[:len(record)-1])
+			csvData = append(csvData, removeEmptyStrings(record))
 		}
 		gameMap.Layers[i].Data.Content = csvData
 	}
