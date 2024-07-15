@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestItConvertsAMapFileTOJSON(t *testing.T) {
+func TestItConvertsAMapFileToJSON(t *testing.T) {
 
 	file, err := os.ReadFile("../mocks/data.tmx")
 	if err != nil {
@@ -29,7 +29,7 @@ func TestItConvertsAMapFileTOJSON(t *testing.T) {
 		Infinite:     0,
 		NextLayerID:  2,
 		NextObjectID: 1,
-		Tilesets: []parser.Tileset{
+		Tilesets: []parser.TilesetReference{
 			{
 				FirstGID: 1,
 				Source:   "../../go-animal-crossing/TileSets/Grass.tsx",
@@ -95,4 +95,42 @@ func TestItConvertsAMapFileTOJSON(t *testing.T) {
 	mapData := parser.GetMapData(file)
 
 	assert.Equal(t, expectation, mapData)
+}
+
+func TestItConvertsATilesetFileToJSON(t *testing.T) {
+	file, err := os.ReadFile("../mocks/tileset.tsx")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	expectation := parser.Tileset{
+		Version:      "1.10",
+		TiledVersion: "1.10.2",
+		Name:         "Grass",
+		TileWidth:    16,
+		TileHeight:   16,
+		TileCount:    77,
+		Columns:      11,
+		Image: parser.Image{
+			Source: "../assets/Tilesets/Grass.png",
+			Width:  176,
+			Height: 112,
+		},
+		Tiles: []parser.Tile{
+			{
+				ID: 36,
+				Properties: []parser.Property{
+					{
+						Name:  "collide",
+						Type:  "bool",
+						Value: "true",
+					},
+				},
+			},
+		},
+	}
+	tileData := parser.GetTilesetData(file)
+
+	assert.Equal(t, expectation, tileData)
 }
