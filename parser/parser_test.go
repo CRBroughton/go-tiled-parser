@@ -10,7 +10,6 @@ import (
 )
 
 func TestItConvertsAMapFileToJSON(t *testing.T) {
-
 	file, err := os.ReadFile("../mocks/data.tmx")
 	if err != nil {
 		fmt.Println(err)
@@ -43,48 +42,127 @@ func TestItConvertsAMapFileToJSON(t *testing.T) {
 				Height: 6,
 				Data: parser.Data{
 					Encoding: "csv",
-					Content: [][]string{
+					Content: []parser.DataTile{
 						{
-							"0",
-							"0",
-							"0",
-							"0",
-							"0",
-						},
-						{
-							"62",
-							"0",
-							"0",
-							"0",
-							"0",
-						},
-						{
-							"0",
-							"0",
-							"62",
-							"0",
-							"0",
-						},
-						{
-							"0",
-							"62",
-							"0",
-							"62",
-							"0",
-						},
-						{
-							"0",
-							"0",
-							"0",
-							"0",
-							"0",
-						},
-						{
-							"0",
-							"3",
-							"0",
-							"0",
-							"54",
+							Tile: "0",
+							X:    0,
+							Y:    0,
+						}, {
+							Tile: "0",
+							X:    1,
+							Y:    0,
+						}, {
+							Tile: "0",
+							X:    2,
+							Y:    0,
+						}, {
+							Tile: "0",
+							X:    3,
+							Y:    0,
+						}, {
+							Tile: "0",
+							X:    4,
+							Y:    0,
+						}, {
+							Tile: "62",
+							X:    0,
+							Y:    1,
+						}, {
+							Tile: "0",
+							X:    1,
+							Y:    1,
+						}, {
+							Tile: "0",
+							X:    2,
+							Y:    1,
+						}, {
+							Tile: "0",
+							X:    3,
+							Y:    1,
+						}, {
+							Tile: "0",
+							X:    4,
+							Y:    1,
+						}, {
+							Tile: "0",
+							X:    0,
+							Y:    2,
+						}, {
+							Tile: "0",
+							X:    1,
+							Y:    2,
+						}, {
+							Tile: "62",
+							X:    2,
+							Y:    2,
+						}, {
+							Tile: "0",
+							X:    3,
+							Y:    2,
+						}, {
+							Tile: "0",
+							X:    4,
+							Y:    2,
+						}, {
+							Tile: "0",
+							X:    0,
+							Y:    3,
+						}, {
+							Tile: "62",
+							X:    1,
+							Y:    3,
+						}, {
+							Tile: "0",
+							X:    2,
+							Y:    3,
+						}, {
+							Tile: "62",
+							X:    3,
+							Y:    3,
+						}, {
+							Tile: "0",
+							X:    4,
+							Y:    3,
+						}, {
+							Tile: "0",
+							X:    0,
+							Y:    4,
+						}, {
+							Tile: "0",
+							X:    1,
+							Y:    4,
+						}, {
+							Tile: "0",
+							X:    2,
+							Y:    4,
+						}, {
+							Tile: "0",
+							X:    3,
+							Y:    4,
+						}, {
+							Tile: "0",
+							X:    4,
+							Y:    4,
+						}, {
+							Tile: "0",
+							X:    0,
+							Y:    5,
+						}, {
+							Tile: "3",
+							X:    1,
+							Y:    5,
+						}, {
+							Tile: "0",
+							X:    2,
+							Y:    5,
+						}, {
+							Tile: "0",
+							X:    3,
+							Y:    5,
+						}, {
+							Tile: "54",
+							X:    4,
+							Y:    5,
 						},
 					},
 					Raw: string("\n0,0,0,0,0,\n62,0,0,0,0,\n0,0,62,0,0,\n0,62,0,62,0,\n0,0,0,0,0,\n0,3,0,0,54\n"),

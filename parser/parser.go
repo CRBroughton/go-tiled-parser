@@ -39,8 +39,14 @@ type Layer struct {
 
 type Data struct {
 	Encoding string     `xml:"encoding,attr" json:"encoding"`
-	Content  [][]string `xml:"-" json:"content"`
+	Content  []DataTile `xml:"-" json:"content"`
 	Raw      string     `xml:",chardata" json:"-"`
+}
+
+type DataTile struct {
+	Tile string `json:"tile"`
+	X    int    `json:"x"`
+	Y    int    `json:"y"`
 }
 
 func removeEmptyStrings(strings []string) []string {
@@ -74,7 +80,9 @@ func GetMapData(gameBytes []byte) Map {
 	for i, layer := range gameMap.Layers {
 		csvReader := csv.NewReader(strings.NewReader(layer.Data.Raw))
 		csvReader.FieldsPerRecord = -1
-		var csvData [][]string
+		var csvData []DataTile
+		row := 0
+
 		for {
 			record, err := csvReader.Read()
 			if err == io.EOF {
@@ -84,7 +92,15 @@ func GetMapData(gameBytes []byte) Map {
 				log.Fatal("Error reading CSV data:", err)
 				break
 			}
-			csvData = append(csvData, removeEmptyStrings(record))
+			for col, value := range removeEmptyStrings(record) {
+				tile := DataTile{
+					X:    col,
+					Y:    row,
+					Tile: value,
+				}
+				csvData = append(csvData, tile)
+			}
+			row++
 		}
 		gameMap.Layers[i].Data.Content = csvData
 	}
@@ -129,4 +145,11 @@ func GetTilesetData(tileBytes []byte) Tileset {
 	}
 
 	return tileset
+}
+
+func GetTilePosition(index, mapWidth, tileWidth, tileHeight int) (width int, height int) {
+	x := (index % mapWidth) * tileWidth
+	y := (index / mapWidth) * tileHeight
+
+	return x, y
 }
